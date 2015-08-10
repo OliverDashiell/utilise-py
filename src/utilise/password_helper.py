@@ -1,4 +1,5 @@
-__author__ = 'jamesstidard'
+__author__ = 'James Stidard'
+
 import hashlib
 import os
 import base64
