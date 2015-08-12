@@ -8,8 +8,8 @@ import base64
 class PasswordHelper:
 
     ALGORITHM  = 'sha512'
-    ITERATIONS = 10000
     HASH_BYTES = 64
+    ITERATIONS = 10000
     SALT_BYTES = HASH_BYTES
 
     ALGORITHM_INDEX = 0
@@ -21,18 +21,24 @@ class PasswordHelper:
 
     @staticmethod
     def create_password(password='', salt=None):
-        salt = os.urandom(PasswordHelper.SALT_BYTES) if not salt else salt
+        algorithm  = PasswordHelper.ALGORITHM
+        iterations = PasswordHelper.ITERATIONS
+        salt       = os.urandom(PasswordHelper.SALT_BYTES) if not salt else salt
+        salt_bytes = PasswordHelper.SALT_BYTES
+        password   = password.encode()
+        delimiter  = PasswordHelper.DELIMITER
 
-        if len(salt) != PasswordHelper.SALT_BYTES:
+        if len(salt) != salt_bytes:
             raise Exception('The provided salt does not meet the required salt length (in bytes) of the current ' +
-                            'stratagem. Provided: ' + str(len(salt)) + '. Required: ' + str(PasswordHelper.SALT_BYTES))
+                            'stratagem. Provided: ' + str(len(salt)) + '. Required: ' + str(salt_bytes))
 
-        password_hash = hashlib.pbkdf2_hmac(PasswordHelper.ALGORITHM, password, salt, PasswordHelper.ITERATIONS)
+        password_hash = hashlib.pbkdf2_hmac(algorithm, password, salt, iterations)
 
-        return PasswordHelper.ALGORITHM     + PasswordHelper.DELIMITER + \
-            base64.b64encode(password_hash) + PasswordHelper.DELIMITER + \
-            str(PasswordHelper.ITERATIONS)  + PasswordHelper.DELIMITER + \
-            base64.b64encode(salt)
+        # Convert the hash and salt into their base64 string representation
+        password_hash = base64.b64encode(password_hash).decode()
+        salt          = base64.b64encode(salt).decode()
+
+        return algorithm + delimiter + str(iterations) + delimiter + str(salt) + delimiter + password_hash
 
     @staticmethod
     def validate_password(stored_password='', guessed_password='', update_stratagem=True, legacy_validator=None):
@@ -41,27 +47,33 @@ class PasswordHelper:
             if update_stratagem: return PasswordHelper.create_password(guessed_password)
             else: return True
 
+        delimiter        = PasswordHelper.DELIMITER
+        algorithm_index  = PasswordHelper.ALGORITHM_INDEX
+        iteration_index  = PasswordHelper.ITERATION_INDEX
+        salt_index       = PasswordHelper.SALT_INDEX
+        hash_index       = PasswordHelper.HASH_INDEX
+        part_count       = PasswordHelper.PART_COUNT
+
         # Split the stored password around the set delimiter
-        parts = stored_password.split(PasswordHelper.DELIMITER)
+        parts = stored_password.split(delimiter)
 
         # If not the number of parts we expect return false (Invalid, legacy, password guess or corrupt data)
-        if len(parts) != PasswordHelper.PART_COUNT: return False
+        if len(parts) != part_count: return False
 
         # Get the hash and the PBKDF2 parameters from parts
-        algorithm     = parts[PasswordHelper.ALGORITHM_INDEX]
-        iterations    = int( parts[PasswordHelper.ITERATION_INDEX] )
-        password_hash = base64.b64decode( parts[PasswordHelper.HASH_INDEX] )
-        salt          = base64.b64decode( parts[PasswordHelper.SALT_INDEX] )
+        algorithm     = parts[algorithm_index]
+        iterations    = int( parts[iteration_index] )
+        salt          = base64.b64decode( parts[salt_index] )
+        password_hash = base64.b64decode( parts[hash_index] )
 
         # If anything's looking wrong at this point get out.
         # TODO: Best log this (should never be hit - maybe exception)
-        if algorithm not in hashlib.algorithms or iterations == 0: return False
+        if algorithm not in hashlib.algorithms_available or iterations == 0: return False
 
         # Give the guess a shot with the parameters used on the stored hash
-        guess_hash = hashlib.pbkdf2_hmac(algorithm, guessed_password, salt, iterations)
+        guess_hash = hashlib.pbkdf2_hmac(algorithm, guessed_password.encode(), salt, iterations)
 
-        # TODO: Slow equals
-        correct_guess      = guess_hash == password_hash
+        correct_guess      = PasswordHelper._slow_equals(guess_hash, password_hash)
         outdated_stratagem = algorithm          != PasswordHelper.ALGORITHM  or \
                              iterations         != PasswordHelper.ITERATIONS or \
                              len(salt)          != PasswordHelper.SALT_BYTES or \
@@ -74,8 +86,17 @@ class PasswordHelper:
         return correct_guess
 
     @staticmethod
-    def change_password(stored_password, old_password, new_password, new_salt=None):
+    def change_password(stored_password, old_password, new_password, salt=None):
         if PasswordHelper.validate_password(stored_password, old_password, False):
-            return PasswordHelper.create_password(new_password, new_salt)
+            return PasswordHelper.create_password(new_password, salt)
 
         return False
+
+    @staticmethod
+    def _slow_equals(a, b):
+        diff = len(a) ^ len(b)
+        i    = 0
+        while i < len(a) and i < len(b):
+            diff |= a[i] ^ b[i]
+            i    += 1
+        return diff == 0
