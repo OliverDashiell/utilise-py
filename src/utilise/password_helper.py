@@ -94,8 +94,7 @@ class PasswordHelper:
 
     @staticmethod
     def _slow_equals(a, b):
-        diff = len(a) ^ len(b)
-        i    = 0
+        diff, i = len(a) ^ len(b), 0
         while i < len(a) and i < len(b):
             diff |= a[i] ^ b[i]
             i    += 1
