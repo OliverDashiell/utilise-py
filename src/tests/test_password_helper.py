@@ -64,7 +64,7 @@ class TestPasswordHelper(TestCase):
         self.assertIsInstance(result.new_password, str, 'New password to store after changing password not returned')
         self.assertTrue(result.new_password, 'New password not returned')
 
-    # TODO: update strategem tests
+    # TODO: update stratagem tests
     def test_change_algorithm(self):
         new_algorithm            = 'sha256'
         PasswordHelper.algorithm = new_algorithm
@@ -72,7 +72,6 @@ class TestPasswordHelper(TestCase):
 
         self.assertTrue(PasswordHelper.algorithm == 'sha256', 'Algorithm change did not stick')
         self.assertTrue(result[:len(new_algorithm)] == new_algorithm, 'new algorithm not used to hash')
-
 
     # TODO: test passing in a salt
 
