@@ -2,7 +2,7 @@ __author__ = 'James Stidard'
 
 import re
 from datetime import datetime
-from src.utilise.built_in_extensions import *
+from utilise.built_in_extensions import *
 
 
 def bool_from_json(x):
