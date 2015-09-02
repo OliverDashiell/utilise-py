@@ -1,14 +1,8 @@
 __author__ = 'James Stidard'
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
-version = '0.1.2'
-
-setup(name='utilise-py',
-      version=version,
-      packages=find_packages(exclude=['tests*']),
-      include_package_data=True,
-      install_requires=['setuptools'])
+version = '0.2.0'
 
 setup(name='utilise-py',
       version=version,
