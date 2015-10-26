@@ -78,11 +78,15 @@ class TestPasswordHelper(TestCase):
     # TODO: test updated passwords are returned correctly
 
     # TODO: test legacy validator
+
     def test_correct_legacy_password(self):
         new_password   = 'my new shiny password'
         guess_password = 'my new shiny password'
-        old_comparator = lambda a, b: a == b
-        result         = PasswordHelper.validate_password(new_password, guess_password, legacy_validator=old_comparator)
+
+        def old_comparator(a, b):
+            return a == b
+
+        result = PasswordHelper.validate_password(new_password, guess_password, legacy_validator=old_comparator)
 
         self.assertTrue(result.success, 'Correct password not valid')
         self.assertTrue(result.new_password, 'Upgrade to legacy password not supplied')

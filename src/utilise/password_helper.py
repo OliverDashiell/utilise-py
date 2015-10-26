@@ -3,6 +3,7 @@ __author__ = 'James Stidard'
 import hashlib
 import os
 import base64
+from typing import Callable
 from collections import namedtuple
 
 
@@ -45,9 +46,7 @@ class PasswordHelper:
     def validate_password(stored_password: str,
                           guessed_password: str,
                           update_stratagem: bool=True,
-                          legacy_validator=None) -> (bool, str):
-
-        # TODO: Type hint for legacy function on release of python 3.5
+                          legacy_validator: Callable[[str, str], bool]=None) -> (bool, str):
         self = PasswordHelper
 
         # If legacy validator, try that first. and then update to new stratagem if they want.
