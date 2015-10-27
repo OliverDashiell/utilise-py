@@ -2,6 +2,7 @@ import re
 import time
 import datetime
 import json
+from typing import Optional
 from src.utilise.built_in_extensions import *
 
 __author__ = 'James Stidard'
@@ -24,13 +25,17 @@ def bool_from_json(value):
 
 class JsonSerialiser:
 
-    # TODO: define a @attribute that a JsonSerialiser object can mark up it's properties with that specify which attributes are surrogates
+    # TODO: find better way to mark and find surrogate properties
+    @classmethod
+    def surrogate_vars( cls ) -> set:
+        return set()
 
-    def to_json_dictionary(self, depth: int=1, surrogate: bool=False, meta: bool=False):
-        depth -= 1
-        result = { '_type': self.__class__.__name__ } if meta else {}
+    def to_json_dictionary(self, depth: int=1, surrogate: bool=False, meta: bool=False) -> dict:
+        depth     -= 1
+        result     = { '_type': self.__class__.__name__ } if meta else {}
+        attributes = self.surrogate_vars() if surrogate else public_vars(self)
 
-        for attribute in public_vars(self.__class__):
+        for attribute in attributes:
             value             = getattr(self, attribute)
             result[attribute] = JsonSerialiser._json_value(value, depth, surrogate)
 
@@ -46,10 +51,10 @@ class JsonSerialiser:
         elif type_ is datetime:
             return to_unix_time(value)
 
-        elif type_ is JsonSerialiser and depth == 1:
+        elif isinstance(value, JsonSerialiser) and depth == 0:
             return value.to_json_dictionary(depth, True)
 
-        elif type_ is JsonSerialiser and depth > 1:
+        elif isinstance(value, JsonSerialiser) and depth >= 1:
             return value.to_json_dictionary(depth, surrogate)
 
         elif type_ is list or type_ is set:
