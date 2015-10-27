@@ -1,8 +1,7 @@
-__author__ = 'James Stidard'
-
 from unittest import TestCase
+from src.utilise.json_serialiser import JsonSerialiser
 
-from utilise.json_serialiser import JsonSerialiser
+__author__ = 'James Stidard'
 
 
 class Thing(JsonSerialiser):
@@ -12,6 +11,7 @@ class Thing(JsonSerialiser):
     float_attr = 23.54
     set_attr   = set()
     list_attr  = []
+    dict_attr  = {}
     child_attr = None
 
 
@@ -22,9 +22,9 @@ class TestObjectSerialiser(TestCase):
 
     # To str
     def test_str_to_str(self):
-        update_dict = { "str_attr": "jet blaines" }
+        update_dict = { "str_attr": "some string" }
         self.thing.update_from_json_dictionary(update_dict)
-        self.assertTrue(self.thing.str_attr == "jet blaines")
+        self.assertTrue(self.thing.str_attr == "some string")
 
     def test_int_to_str(self):
         update_dict = { "str_attr": 9000 }
