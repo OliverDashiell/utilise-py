@@ -3,7 +3,7 @@ import time
 import datetime
 import json
 from typing import Optional
-from src.utilise.built_in_extensions import *
+from utilise.built_in_extensions import *
 
 __author__ = 'James Stidard'
 
@@ -25,43 +25,43 @@ def bool_from_json(value):
 
 class JsonSerialiser:
 
-    # TODO: find better way to mark and find surrogate properties
-    @classmethod
-    def surrogate_vars( cls ) -> set:
-        return set()
-
-    def to_json_dictionary(self, depth: int=1, surrogate: bool=False, meta: bool=False) -> dict:
-        depth     -= 1
-        result     = { '_type': self.__class__.__name__ } if meta else {}
-        attributes = self.surrogate_vars() if surrogate else public_vars(self)
-
-        for attribute in attributes:
-            value             = getattr(self, attribute)
-            result[attribute] = JsonSerialiser._json_value(value, depth, surrogate)
-
-        return result
-
-    @staticmethod
-    def _json_value(value, depth: int=1, surrogate: bool=False):
-        type_ = type(value)
-
-        if not value and type_ is not bool:
-            return None
-
-        elif type_ is datetime:
-            return to_unix_time(value)
-
-        elif isinstance(value, JsonSerialiser) and depth == 0:
-            return value.to_json_dictionary(depth, True)
-
-        elif isinstance(value, JsonSerialiser) and depth >= 1:
-            return value.to_json_dictionary(depth, surrogate)
-
-        elif type_ is list or type_ is set:
-            return [JsonSerialiser._json_value(item, depth, surrogate) for item in value]
-
-        elif type_ is str or type_ is int or type_ is float or type_ is bool:
-            return value
+    # # TODO: find better way to mark and find surrogate properties
+    # @classmethod
+    # def surrogate_vars( cls ) -> set:
+    #     return set()
+    #
+    # def to_json_dictionary(self, depth: int=1, surrogate: bool=False, meta: bool=False) -> dict:
+    #     depth     -= 1
+    #     result     = { '_type': self.__class__.__name__ } if meta else {}
+    #     attributes = self.surrogate_vars() if surrogate else public_vars(self)
+    #
+    #     for attribute in attributes:
+    #         value             = getattr(self, attribute)
+    #         result[attribute] = JsonSerialiser._json_value(value, depth, surrogate)
+    #
+    #     return result
+    #
+    # @staticmethod
+    # def _json_value(value, depth: int=1, surrogate: bool=False):
+    #     type_ = type(value)
+    #
+    #     if not value and type_ is not bool:
+    #         return None
+    #
+    #     elif type_ is datetime:
+    #         return to_unix_time(value)
+    #
+    #     elif isinstance(value, JsonSerialiser) and depth == 0:
+    #         return value.to_json_dictionary(depth, True)
+    #
+    #     elif isinstance(value, JsonSerialiser) and depth >= 1:
+    #         return value.to_json_dictionary(depth, surrogate)
+    #
+    #     elif type_ is list or type_ is set:
+    #         return [JsonSerialiser._json_value(item, depth, surrogate) for item in value]
+    #
+    #     elif type_ is str or type_ is int or type_ is float or type_ is bool:
+    #         return value
 
     def update_from_json_dictionary(self, dictionary: dict):
         for attribute in public_vars(self.__class__):

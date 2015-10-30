@@ -110,5 +110,3 @@ class TestObjectSerialiser(TestCase):
 
         for attr in json_child:
             self.assertTrue(attr in public_vars(self.thing))
-
-
