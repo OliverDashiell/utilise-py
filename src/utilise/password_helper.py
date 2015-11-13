@@ -70,7 +70,7 @@ class PasswordHelper:
 
         # Return the new password blob to store if update is required and guess was correct
         password_required = correct_guess and update_stratagem and outdated_stratagem
-        new_password      = self.create_password(guessed_password) if password_required else ''
+        new_password      = self.create_password(guessed_password) if password_required else stored_password
 
         return self.Result(correct_guess, new_password)
 
@@ -85,7 +85,7 @@ class PasswordHelper:
             new_password = PasswordHelper.create_password(new_password, salt)
             return PasswordHelper.Result(True, new_password)
 
-        return PasswordHelper.Result(False, '')
+        return PasswordHelper.Result(False, stored_password)
 
     @staticmethod
     def _parts_from_password(password: str) -> (str, int, str, str):

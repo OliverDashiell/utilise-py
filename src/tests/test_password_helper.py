@@ -32,7 +32,7 @@ class TestPasswordHelper(TestCase):
         result          = PasswordHelper.validate_password(stored_password, guess_password)
 
         self.assertTrue(result.success, 'Correct password not valid')
-        self.assertFalse(result.new_password, 'No new password should be needed')
+        self.assertEqual(result.new_password, stored_password, 'No new password should be needed')
 
     def test_invalid_password(self):
         new_password    = 'my new shiny password'
@@ -41,7 +41,7 @@ class TestPasswordHelper(TestCase):
         result          = PasswordHelper.validate_password(stored_password, guess_password)
 
         self.assertFalse(result.success, 'Incorrect password was found valid')
-        self.assertFalse(result.new_password, 'No new password should be needed')
+        self.assertEqual(result.new_password, stored_password, 'No new password should be needed')
 
     def test_change_password_fail(self):
         actual_password    = 'my cruddy old password'
@@ -51,7 +51,7 @@ class TestPasswordHelper(TestCase):
         result             = PasswordHelper.change_password(stored_password, incorrect_password, new_password)
 
         self.assertFalse(result.success)
-        self.assertFalse(result.new_password, 'No new password should be needed')
+        self.assertEqual(result.new_password, stored_password, 'No new password should be needed')
 
     def test_change_password_success(self):
         old_password       = 'my cruddy old password'
@@ -99,7 +99,7 @@ class TestPasswordHelper(TestCase):
         result = PasswordHelper.validate_password(stored_password, guess_password, legacy_validator=self.old_comparator)
 
         self.assertTrue(result.success, 'Correct password not valid')
-        self.assertFalse(result.new_password, 'No new password should be needed')
+        self.assertEqual(result.new_password, stored_password, 'No new password should be needed')
 
     def test_incorrect_legacy_password(self):
         new_password    = 'my new shiny password'
@@ -118,4 +118,4 @@ class TestPasswordHelper(TestCase):
         result = PasswordHelper.validate_password(stored_password, guess_password, legacy_validator=self.old_comparator)
 
         self.assertFalse(result.success, 'Correct password not valid')
-        self.assertFalse(result.new_password, 'No new password should be needed')
+        self.assertEqual(result.new_password, stored_password, 'No new password should be needed')
